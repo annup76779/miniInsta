@@ -1,0 +1,6 @@
+env
+__pycache__
+.idea
+static/*.mp4
+static/*.jpg
+*.json

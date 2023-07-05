@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>instagram reels clone yt</title>
+    <link rel="stylesheet"href="../static/style.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+</head>
+<body>
+
+    <div class="app__videos">
+        <div class="video"> 
+            <!--header starts-->
+            <div class="videoHeader">
+                <span class="material-symbols-outlined"> arrow_back </span>
+                <h3>Desihub</h3>
+                <span class="material-symbols-outlined mute-btn" onclick="toggleMute(); toggleIcons()">volume_off</span>
+            </div>
+            <!--header ends-->
+            <video src="" class="video__player"  id="video-0" muted autoplay loop onclick="togglePlay(this)"></video>
+
+            <div class="playButton" id="playBTN-0" onclick="togglePlay(document.getElementById('video-0')); hidePlayButton();">
+                <i class="fa fa-play" aria-hidden="true"></i>
+            </div>
+
+            <!-- footer starts -->
+            <div class="videoFooter">
+                <span class="center-icon-up">
+                    <button class="material-symbols-outlined">input_circle </button>
+                </span>
+
+                <span class="center-icon-down">
+                    <button class="material-symbols-outlined" onclick="shiftVideos()" class="center-icon-down" style="transform: rotate(180deg);">input_circle </button>
+                </span>
+                <!-- footer ends -->
+            </div>
+            <!-- sidebar start -->
+            <div class="videoSidebar">
+                <span class="like">
+                    <button class="fa fa-heart-o" aria-hidden="true" style="font-size: 25px;" data-status="0" onclick="toggleLike(this);"></button>
+                </span>
+               <span class="share">
+                    <button class="material-icons" style="transform: rotateY(180deg);" onclick="copyToClipboard();">reply</button><br>
+               </span>
+
+            </div>
+        </div>
+
+  </div>
+   <!-- popup box  -->
+   <div class="popup hidden" id="popupBox"></div>
+</body>
+<script>
+    arr = []
+    var current_index = 1;
+    var downOffset = 0;
+    muted=true;
+    function shiftVideos() {
+            var videos = document.querySelectorAll(".video");
+            var newVideo = document.createElement("div");
+            newVideo.className = "video";
+            newVideo.innerHTML = ` 
+            <!--header starts-->
+            <div class="videoHeader" >
+                <span class="material-symbols-outlined"> arrow_back </span>
+                <h3>Desihub</h3>
+                <span class="material-symbols-outlined mute-btn" onclick="toggleMute(); toggleIcons();">${(muted==true)?"volume_off":"volume_up"}</span>
+            </div>
+            <!--header ends-->
+            <video src="${URL.createObjectURL(arr[current_index-1])}" id="video-${current_index}" class="video__player" 
+            ${(muted==true)?'muted':''}
+            autoplay loop onclick="togglePlay(this)"></video>
+
+            <div class="playButton" id="playBTN-${current_index}" onclick="togglePlay(document.getElementById('video-${current_index}')); hidePlayButton();">
+                <i class="fa fa-play" aria-hidden="true"></i>
+            </div>
+
+            <!-- footer starts -->
+            <div class="videoFooter">
+                <span class="center-icon-up">
+                    <button class="material-symbols-outlined" onclick="addVideo()">input_circle </button>
+                </span>
+
+                <span class="center-icon-down">
+                    <button class="material-symbols-outlined" onclick="shiftVideos()" class="center-icon-down" style="transform: rotate(180deg);">input_circle </button>
+                </span>
+                <!-- footer ends -->
+            </div>
+            <!-- sidebar start -->
+            <div class="videoSidebar">
+                <span class="like">
+                     <button class="fa fa-heart-o" aria-hidden="true" style="font-size: 25px;" data-status="0" onclick="toggleLike(this);"></button>
+                </span>
+               <span class="share">
+                    <button class="material-icons" style="transform: rotateY(180deg);" onclick="copyToClipboard();">reply</button><br>
+               </span>
+
+            </div>
+            `
+            var video = videos[0];
+            current_video = videos[videos.length - 1]
+            current_video.querySelector('.video__player').pause();
+            video.parentNode.appendChild(newVideo)
+            var videoHeight = video.offsetHeight;
+            var pageSize = videoHeight; // Adjust the page size as desired
+            newVideo.querySelector(".video__player").play();
+
+            video.style.marginTop = `-${pageSize * current_index}px`;
+            downOffset += videoHeight;
+            current_index += 1;
+            hidePlayButton()
+
+            if (current_index+1 >= arr.length - 1){
+                for(var i = current_index+1; i < current_index+2; i++){
+                    fetchVideos(current_index)
+                }
+            }
+        }
+
+        function addVideo(){
+            // // Remove the last video after a delay (e.g., 500 milliseconds)
+            var videos = document.querySelectorAll(".video");
+
+            videos[videos.length-1].remove();
+
+            var video = videos[0];
+            var videoHeight = video.offsetHeight;
+            var pageSize = downOffset - videoHeight; // Adjust the page size as desired
+
+            video.style.marginTop = `-${pageSize}px`;
+            current_video = videos[videos.length - 2];
+            videoObj = current_video.querySelector(".video__player");
+            videoObj.currentTime=0;
+            videoObj.muted = muted
+            videoObj.play();
+            current_index -= 1;
+            downOffset -= videoHeight;
+            arr.pop()
+            hidePlayButton();
+        }
+
+        function togglePlay(currentVideo) {
+            if (currentVideo.paused) {
+                currentVideo.play();
+                hidePlayButton()
+            } else {
+                currentVideo.pause();
+                showPlayButton()
+            }
+        }
+
+        function showPlayButton() {
+            playButton = document.getElementById(`playBTN-${current_index-1}`)
+            playButton.style.display = 'block';
+        }
+
+        function hidePlayButton() {
+            playButton = document.getElementById(`playBTN-${current_index-1}`)
+            playButton.style.display = 'none';
+        }
+
+        function toggleMute(){
+            muted = !muted;
+            videos = document.querySelectorAll('.video');
+            current_video = videos[videos.length - 1].querySelector('.video__player');
+            current_video.muted = !current_video.muted;
+        }
+
+        function copyToClipboard() {
+            var currentUrl = window.location.href;
+
+            navigator.clipboard.writeText(currentUrl)
+                .then(function() {
+                    showPopup("Coppied");
+                })
+                .catch(function(error) {
+                    showPopup("Failed Copy!")
+                }
+            );
+        }
+
+        function showPopup(message) {
+            var popupBox = document.getElementById('popupBox');
+            popupBox.textContent = message;
+            popupBox.classList.remove('hidden');
+
+            setTimeout(function() {
+                popupBox.classList.add('hidden');
+            }, 1000);
+        }
+
+        function toggleIcons() {
+            var volumeUpIcon = document.querySelectorAll('.mute-btn');
+            volumeUpIcon.forEach(element => {
+                if(muted == true)
+                    element.textContent = "volume_off"
+                else if(muted==false)
+                    element.textContent = "volume_up"
+            })
+        }
+
+        toggleLike = el =>{
+            if(el.getAttribute("data-status") == "1"){
+                el.setAttribute("data-status", "0")
+                el.classList.remove("fa-heart"); // phele like tha to dislike krna h
+                el.classList.add("fa-heart-o");
+                el.style.color = "white";
+            }
+            else if (el.getAttribute("data-status") == "0"){
+                el.setAttribute("data-status", "1")
+                el.classList.remove("fa-heart-o"); // phele like tha to dislike krna h
+                el.classList.add("fa-heart");
+                el.style.color = 'red';
+            }
+        }
+
+        async function fetchVideos(index) {
+            console.log(index)
+            // Fetch the videos in chunks
+            const chunkSize = 4; // Number of videos to fetch in each chunk
+            const startIndex = arr.length; // Index to start fetching videos from
+
+            await fetch(`/static/video${index}.mp4`)
+            .then(response => response.blob())
+            .then(blob => {
+                // Store the blob object in the array
+                arr.push(blob);
+                console.log(arr)
+                if (arr.length == 1){
+                    document.getElementById("video-0").src = URL.createObjectURL(arr[current_index-1])
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching video:', error);
+            });
+    }
+
+    window.onload = function(){
+        fetchVideos(1)
+        videos = document.querySelectorAll(".video");
+        var current_video = videos[0];
+        current_video.querySelector(".video__player").play();
+        showPopup("Desi Hub")
+    }
+</script>
+</html>
